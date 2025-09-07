@@ -10,7 +10,7 @@ on:
 
 jobs:
   deploy-enigmano:
-    name: "🚀 Deploy EnigMano Instance ${{ github.event.inputs.INSTANCE }}"
+    name: "🚀 Deploy EnigMano Instance"
     runs-on: windows-latest
 
     env:
@@ -63,7 +63,8 @@ jobs:
         shell: pwsh
         run: |
           Write-Host "🚦 Initiating EnigMano-instance.ps1"
-          powershell.exe -ExecutionPolicy Bypass -File ".\EnigMano-instance.ps1"
+          Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+          .\EnigMano-instance.ps1
 
       - name: 💠 Final Status
         if: always()
