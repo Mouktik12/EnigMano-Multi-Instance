@@ -20,6 +20,7 @@ jobs:
       REPO: ${{ github.repository }}
       WORKFLOW_FILE: "enigmano.yml"
       DEPLOYMENT_ID: ${{ github.run_id }}
+      NGROK_REGION: "us"  # 🔁 Force ngrok to use a stable region
 
     steps:
       - name: 📌 Deployment Parameters
@@ -32,6 +33,9 @@ jobs:
           Write-Host "📦 GitHub Repository     : $env:REPO"
           Write-Host "🔁 Deployment Workflow   : $env:WORKFLOW_FILE"
           Write-Host "🆔 Deployment ID         : $env:DEPLOYMENT_ID"
+          Write-Host "🕒 Current System Time   : $(Get-Date)"
+          Write-Host "🕓 Time Zone Offset      : $([System.TimeZoneInfo]::Local.GetUtcOffset([datetime]::Now).TotalHours) hours"
+          Write-Host "🗺️ Forced Ngrok Region   : $env:NGROK_REGION"
           Write-Host "==============================================="
 
       - name: 🔐 Validate Secrets
@@ -46,6 +50,18 @@ jobs:
             exit 1
           }
           Write-Host "✅ All required secrets validated successfully"
+
+      - name: ⚙️ Configure Ngrok (Region + Token)
+        shell: pwsh
+        run: |
+          $ngrokPath = "$env:USERPROFILE\AppData\Local\ngrok"
+          New-Item -ItemType Directory -Path $ngrokPath -Force | Out-Null
+          $ngrokConfig = @"
+authtoken: $env:NGROK_SHAHZAIB
+region: $env:NGROK_REGION
+"@
+          $ngrokConfig | Out-File -FilePath "$ngrokPath\ngrok.yml" -Encoding utf8
+          Write-Host "✅ Ngrok configuration file created at $ngrokPath\ngrok.yml"
 
       - name: 📥 Download EnigMano-instance.ps1
         shell: pwsh
